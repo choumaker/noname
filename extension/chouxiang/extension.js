@@ -44,6 +44,8 @@ export default function () {
                             return event.card.name == "nanman" && !event.getParent().directHit.includes(event.target);
                         },
                         async content(event, trigger, player) {
+                            if (trigger.target.group == "qun") return; // 对群雄角色无影响
+
                             const id = trigger.target.playerid;
                             const map = trigger.getParent().customArgs;
                             if (!map[id]) map[id] = {};
@@ -58,6 +60,7 @@ export default function () {
                             threaten: 1.5, // AI 威胁值
                             effect: {
                                 target(card, player, target) {
+                                    if (target.group == "qun") return 0; // 对群雄角色无影响
                                     if (get.type(card) == "trick" && card.name == "nanman") {
                                         return [0, 0.5]; // 南蛮入侵的效果
                                     }
@@ -80,7 +83,7 @@ export default function () {
                     "chouxiang_zuikui": "罪魁",
                     "chouxiang_zuikui_info": "锁定技，所有伤害的来源均视为你。",
                     "chouxiang_dongying": "东瀛",
-                    "chouxiang_dongying_info": "主公技，锁定技，你使用的南蛮入侵需要额外一张杀才能抵消。",
+                    "chouxiang_dongying_info": "主公技，锁定技，非群雄势力角色响应你使用的【南蛮入侵】，需要额外打出一张杀。",
                     "chouxiang_test_manqin": "蛮侵",
                     "chouxiang_test_manqin_info": "【测试用】锁定技，回合开始时，获得一张南蛮入侵。",
                 },
