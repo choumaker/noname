@@ -29,11 +29,21 @@ export default function () {
             skill: {
                 skill: {
                     "chouxiang_zuikui": {
-                        trigger: { global: "damageBegin" }, // 用 damageBefore 的话如果自己有寒冰剑会被触发
+                        trigger: { global: "damageBegin4" }, // 用 damageBefore 的话如果自己有寒冰剑会被触发
                         forced: true,
                         async content(event, trigger, player) {
                             trigger.source = player; // 将伤害来源改为自己
                             //trigger.num+=2; // 增加伤害数值，测试用
+                        },
+                        ai: {
+                            threaten: 1.5, // AI 威胁值
+                            effect: {
+                                target(card, player, target) {
+                                    if (get.type(card) == "damage") {
+                                        return [0, 0.5]; // 受到伤害的效果
+                                    }
+                                },
+                            },
                         },
                     },
                     "chouxiang_dongying": {
@@ -81,7 +91,7 @@ export default function () {
                 },
                 translate: {
                     "chouxiang_zuikui": "罪魁",
-                    "chouxiang_zuikui_info": "锁定技，所有伤害的来源均视为你。",
+                    "chouxiang_zuikui_info": "锁定技，所有即将最终结算的伤害，来源均视为你。",
                     "chouxiang_dongying": "东瀛",
                     "chouxiang_dongying_info": "主公技，锁定技，非群雄势力角色响应你使用的【南蛮入侵】，需要额外打出一张杀。",
                     "chouxiang_test_manqin": "蛮侵",
