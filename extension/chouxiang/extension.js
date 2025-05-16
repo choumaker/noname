@@ -12,8 +12,8 @@ export default function(){
         },help:{},config:{},package:{
     character: {
         character: {
-            erenxiaochuan: ["male","qun",5,["chouxiang_zuikui","chouxiang_dongying"],["zhu","des:罪魁祸首","ext:chouxiang/erenxiaochuan.jpg","die:ext:chouxiang/audio/die/erenxiaochuan.mp3"]],
-            cx_otto: ["male","wei",3,[],["des:教父"]],
+            erenxiaochuan: {sex:"male",group:"qun",hp:5,skills:["chouxiang_zuikui","chouxiang_dongying"],descriptions:["zhu","des:罪魁祸首","ext:chouxiang/erenxiaochuan.jpg","die:ext:chouxiang/audio/die/erenxiaochuan.mp3"]},
+            cx_otto: {sex:"male",group:"wei",hp:3,skills:["chouxiang_waao"],descriptions:["des:教父"], hasHiddenSkill: true,},
         },
         translate: {
             erenxiaochuan: "恶人笑川",
@@ -99,6 +99,30 @@ export default function(){
                 },
                 "_priority": 0,
             },
+            "chouxiang_waao": {
+                trigger: { player: "showCharacterAfter" },
+                forced: true,
+                hasHiddenSkill: true,
+                hiddenSkill: true,
+                filterCard: (event, player) => player.hasCard(player.canRecast(card), "h"),
+                async content(event, trigger, player) {
+                    const players = game.filterPlayer();
+                    for (const p of players) {
+                        console.log(`Processing player: ${p.name}`);
+                        if (p.countCards("h") > 0) {
+                            const randomCard = p.getCards("h").randomGet();
+                            await p.recast(randomCard); // 随机重铸一张手牌
+                            if (get.suit(randomCard) == "heart") {
+                                await p.loseHp(1); // 弃置红桃牌的角色失去一点体力
+                            }
+                        } else {
+                            await p.loseHp(1); // 无手牌或弃置红桃牌的角色失去一点体力
+                        }
+                    }
+                    
+                    // TODO: 设置距离
+                },
+            }
         },
         translate: {
             "chouxiang_zuikui": "罪魁",
@@ -107,6 +131,8 @@ export default function(){
             "chouxiang_dongying_info": "主公技，锁定技，非群雄势力角色响应你使用的【南蛮入侵】，需要额外打出一张杀。",
             "chouxiang_test_manqin": "蛮侵",
             "chouxiang_test_manqin_info": "【测试用】锁定技，回合开始时，获得一张南蛮入侵。",
+            "chouxiang_waao": "哇袄",
+            "chouxiang_waao_info": "隐匿技，锁定技，你登场时，所有角色随机重铸一张手牌。无手牌或弃置红桃牌的角色失去一点体力。你与所有角色的距离视为1直到首轮结束。",
         },
     },
     intro: "",
