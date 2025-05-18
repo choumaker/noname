@@ -62,7 +62,7 @@ export default function () {
                             }
                             return false;
                         },
-                        content: function () {
+                        async content(event, trigger, player) {
                             var player = _status.event.player;
                             var target = _status.event.target;
 
@@ -71,9 +71,9 @@ export default function () {
                             if (player.group == "shu") {
                                 player.chooseToCompare(target).set("visible", true).callback = function (result) {
                                     if (result > 0) {
-                                        game.asyncDraw(player, 3);
+                                        await player.draw(1);
                                     } else {
-                                        game.asyncDraw(player, 1);
+                                        await player.draw(1);
                                     }
                                 };
                             } else if (player.group == "wei") {
