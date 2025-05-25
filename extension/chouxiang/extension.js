@@ -1,3 +1,4 @@
+import { triggerRef } from "../../game/vue.esm-browser.js";
 import { lib, game, ui, get, ai, _status } from "../../noname.js";
 export const type = "extension";
 export default function () {
@@ -13,7 +14,7 @@ export default function () {
 			character: {
 				character: {
 					erenxiaochuan: { sex: "male", group: "qun", hp: 5, skills: ["chouxiang_zuikui", "chouxiang_dongying"], descriptions: ["zhu", "des:罪魁祸首", "ext:chouxiang/erenxiaochuan.jpg", "die:ext:chouxiang/audio/die/erenxiaochuan.mp3"] },
-					cx_otto: { sex: "male", group: "wei", hp: 3, skills: ["chouxiang_waao", "chouxiang_shuncong"], descriptions: ["des:教父"], hasHiddenSkill: true },
+					cx_otto: { sex: "male", group: "wei", hp: 3, skills: ["chouxiang_waao", "chouxiang_fangguan", "chouxiang_shuncong"], descriptions: ["des:教父"], hasHiddenSkill: true },
 				},
 				translate: {
 					erenxiaochuan: "恶人笑川",
@@ -141,6 +142,22 @@ export default function () {
 							trigger.directHit.push(player); // 不能使用或打出手牌
 						},
 					},
+					chouxiang_fangguan: {
+						trigger: { target: "useCardToTarget" },
+						filter(event, player) {
+							if (!event ||!event.targets || !event.targets.includes(player)) return false;
+							// TODO: 没有“房管”的角色
+							return event.player != player;
+						},
+						async content(event, trigger, player) {
+							await player.draw(2); // 摸两张牌
+							const card = await player.chooseCard("h", true,"选择一张牌放置在武将牌上");
+							//await player.showCards(card); // 显示选择的牌
+							await player.$giveAuto(card, trigger.player, false);
+							await trigger.player.addToExpansion(card).gaintag.add("chouxiang_fangguan"); // 将牌放置在武将牌上
+							//
+						},
+					},
 				},
 				translate: {
 					chouxiang_zuikui: "罪魁",
@@ -153,6 +170,8 @@ export default function () {
 					chouxiang_waao_info: "隐匿技，锁定技，你登场时，所有角色随机重铸一张手牌。无手牌或弃置红桃牌的角色失去一点体力。你与所有角色的距离视为1直到你的第一个回合结束。",
 					chouxiang_shuncong: "顺从",
 					chouxiang_shuncong_info: "锁定技，体力小于等于1的角色对你使用牌时，你摸一张牌，但不能使用或打出手牌。",
+					chouxiang_fangguan: "房管",
+					chouxiang_fangguan_info: "其他角色对你使用牌时，若其没有“房管”，你可以摸两张牌，并将一张牌牌面向上至于其武将牌上，称为“房管”。有“房管”的角色对你使用牌无距离限制，你对有“房管”的角色使用牌无次数限制。一名角色的回合结束时，若其有“房管”，其选择一项：①令你回复一点体力，然后获得武将牌上的“房管”；②对你使用一张牌（需合法），然后获得武将牌上的“房管”；③弃置一张坐骑牌；④交给你一张牌；⑤失去一点体力。",
 				},
 			},
 			intro: "",
