@@ -4,10 +4,10 @@ export const type = "extension";
 export default function () {
 	return {
 		name: "chouxiang",
-		arenaReady: function () {},
-		content: function (config, pack) {},
-		prepare: function () {},
-		precontent: function () {},
+		arenaReady: function () { },
+		content: function (config, pack) { },
+		prepare: function () { },
+		precontent: function () { },
 		help: {},
 		config: {},
 		package: {
@@ -135,7 +135,7 @@ export default function () {
 						forced: true,
 						filter(event, player) {
 							if (!event.targets || !event.targets.includes(player)) return false;
-							return event.player.hp <= 1; // 体力小于等于1的角色
+							return event.player.hp <= 1 || event.player.hasSkill("chouxiang_fangguan_victim"); // 体力小于等于1的角色或有“房管”的角色
 						},
 						async content(event, trigger, player) {
 							await player.draw(1); // 摸一张牌
@@ -143,20 +143,43 @@ export default function () {
 						},
 					},
 					chouxiang_fangguan: {
-						trigger: { target: "useCardToTarget" },
+						trigger: { target: "useCardToTargeted" }, // 触发时机是被指定为目标“后”。否则给了“房管”后，“顺从”也会立即触发
 						filter(event, player) {
-							if (!event ||!event.targets || !event.targets.includes(player)) return false;
-							// TODO: 没有“房管”的角色
-							return event.player != player;
+							if (!event || !event.targets || !event.targets.includes(player)) return false;
+							return event.player != player && !event.player.hasSkill("chouxiang_fangguan_victim");
 						},
 						async content(event, trigger, player) {
 							await player.draw(2); // 摸两张牌
-							const card = await player.chooseCard("h", true,"选择一张牌放置在武将牌上");
-							//await player.showCards(card); // 显示选择的牌
-							await player.$giveAuto(card, trigger.player, false);
-							await trigger.player.addToExpansion(card).gaintag.add("chouxiang_fangguan"); // 将牌放置在武将牌上
-							//
+							const cards = await player.chooseCard("he", true, `将一张牌作为“房管”置于其武将牌上`).forResultCards();
+							const target = trigger.player;
+							const card = cards[0];
+							await player.give(cards[0], trigger.player, "give").gaintag.add("chouxiang_fangguan");
+							await player.line(target); // 连接线
+							await target.addToExpansion(card, player, "give").gaintag.add("chouxiang_fangguan_victim");
+							await target.addSkill("chouxiang_fangguan_victim");
+							await game.delayx();
 						},
+						mod: {
+							cardUsableTarget(card, player, target) {
+								if (target.hasSkill("chouxiang_fangguan_victim")) return true;
+							},
+						},
+						subSkill: {
+						},
+					},
+					chouxiang_fangguan_victim: {
+						marktext: "管",
+						intro: {
+							content: "expansion",
+							markcount: "expansion",
+						},
+						charlotte: true,
+						mod: {
+							targetInRange(card, player, target) {
+								if (target.hasSkill("chouxiang_fangguan")) return true; // “房管”角色对你使用牌无距离限制
+							}
+						},
+						// TODO: “房管”角色对你使用牌无距离限制
 					},
 				},
 				translate: {
@@ -171,7 +194,9 @@ export default function () {
 					chouxiang_shuncong: "顺从",
 					chouxiang_shuncong_info: "锁定技，体力小于等于1的角色对你使用牌时，你摸一张牌，但不能使用或打出手牌。",
 					chouxiang_fangguan: "房管",
-					chouxiang_fangguan_info: "其他角色对你使用牌时，若其没有“房管”，你可以摸两张牌，并将一张牌牌面向上至于其武将牌上，称为“房管”。有“房管”的角色对你使用牌无距离限制，你对有“房管”的角色使用牌无次数限制。一名角色的回合结束时，若其有“房管”，其选择一项：①令你回复一点体力，然后获得武将牌上的“房管”；②对你使用一张牌（需合法），然后获得武将牌上的“房管”；③弃置一张坐骑牌；④交给你一张牌；⑤失去一点体力。",
+					chouxiang_fangguan_info: "其他角色使用牌指定你为目标后，若其没有“房管”，你可以摸两张牌，并将一张牌牌面向上至于其武将牌上，称为“房管”。有“房管”的角色对你使用牌无距离限制，你对有“房管”的角色使用牌无次数限制。一名角色的回合结束时，若其有“房管”，其选择一项：①令你回复一点体力，然后获得武将牌上的“房管”；②对你使用一张牌（需合法），然后获得武将牌上的“房管”；③弃置一张坐骑牌；④交给你一张牌；⑤失去一点体力。",
+					chouxiang_fangguan_victim: "房管",
+					chouxiang_fangguan_victim_info: "拥有“房管”的角色。",
 				},
 			},
 			intro: "",
