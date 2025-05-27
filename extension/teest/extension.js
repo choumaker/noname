@@ -62,21 +62,25 @@ export default function () {
                             }
                             return false;
                         },
-                        async content(event, trigger, player) {
+                        content: async function () {
                             var player = _status.event.player;
                             var target = _status.event.target;
 
                             player.logSkill("gailing_aiguo", target);
 
                             if (player.group == "shu") {
-                                player.chooseToCompare(target).set("visible", true).callback = function (result) {
-                                    if (result > 0) {
-                                        await player.draw(1);
-                                    } else {
-                                        await player.draw(1);
-                                    }
-                                };
+                                if (player.countCards("h") == 0 || target.countCards("h") == 0) return;
+
+                                // 拼点过程（结构参考 tianyi）
+                                const result = await player.chooseToCompare(target).forResultBool();
+
+                                if (result) {
+                                    player.draw(3);  // 拼点胜利
+                                } else {
+                                    player.draw();   // 拼点失败或平局
+                                }
                             } else if (player.group == "wei") {
+                                // 魏国效果：视为使用一张杀（不计入次数限制）
                                 player.useCard({ name: "sha" }, target, null, false);
                             }
                         },
@@ -88,7 +92,8 @@ export default function () {
                                 }
                             }
                         }
-                    }
+                    },
+
                 },
                 translate: {
                     "gailing_zishiying": "自适应",
@@ -96,12 +101,13 @@ export default function () {
                     "gailing_aiguo": "爱国",
                     "gailing_aiguo_info": "出牌阶段限一次：若你当前属于\"蜀\"阵营，你可选择一名其他角色与其拼点，若你赢，摸两张牌；若你输，摸一张牌（若任意一方无手牌则无法拼点）。若你当前属于\"魏\"阵营，你可选择攻击范围内的一名角色，视为对其使用一张【杀】（不计入使用次数限制）。"
                 },
+                intro: "",
+                author: "无名玩家",
+                diskURL: "",
+                forumURL: "",
+                version: "1.0",
             },
-            intro: "",
-            author: "无名玩家",
-            diskURL: "",
-            forumURL: "",
-            version: "1.0",
-        }, files: { "character": ["谷爱凌.jpg"], "card": [], "skill": [], "audio": [] }, connect: false
+            files: { "character": ["谷爱凌.jpg"], "card": [], "skill": [], "audio": [] }, connect: false
+        }
     }
-};
+}
