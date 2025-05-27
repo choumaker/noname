@@ -101,7 +101,6 @@ export default function () {
 					chouxiang_waao: {
 						trigger: { player: "showCharacterAfter" },
 						forced: true,
-						hasHiddenSkill: true,
 						hiddenSkill: true,
 						filterCard: (event, player) => player.hasCard(player.canRecast(card), "h"),
 						async content(event, trigger, player) {
@@ -157,14 +156,13 @@ export default function () {
 							await player.line(target); // 连接线
 							await target.addToExpansion(card, player, "give").gaintag.add("chouxiang_fangguan_victim");
 							await target.addSkill("chouxiang_fangguan_victim");
+							target.storage.chouxiang_fangguan_victim = player;
 							await game.delayx();
 						},
 						mod: {
 							cardUsableTarget(card, player, target) {
-								if (target.hasSkill("chouxiang_fangguan_victim")) return true;
+								if (target.hasSkill("chouxiang_fangguan_victim")) return true; // 对有“房管”的角色使用牌无次数限制
 							},
-						},
-						subSkill: {
 						},
 					},
 					chouxiang_fangguan_victim: {
@@ -179,7 +177,90 @@ export default function () {
 								if (target.hasSkill("chouxiang_fangguan")) return true; // “房管”角色对你使用牌无距离限制
 							}
 						},
-						// TODO: “房管”角色对你使用牌无距离限制
+						trigger: { player: "phaseEnd" },
+						async content(event, trigger, player) {
+							const ottoPlayer = player.storage.chouxiang_fangguan_victim;
+							if (!ottoPlayer) return; // 没有“房管”则不执行
+							var list = [1, 2, 3, 4, 5];
+							var list2 = list.slice();
+
+							if (ottoPlayer.isHealthy()) {
+								list2.remove(1); // 满血，移除选项一
+							}
+							// 如果没有可用牌， 移除选项二
+							if (player.countCards("h") == 0) {
+								list2.remove(2);
+							}
+							// 检查是否有可对电棍使用的牌，否则移除选项二
+							const usableCardsToOtto = player.getCards("h").filter(card => player.canUse(card, ottoPlayer, true, false));
+							if (usableCardsToOtto.length === 0) {
+								list2.remove(2);
+							}
+
+							// 如果没有坐骑牌， 移除选项三
+							if (player.countCards("e", (card) => get.type(card) == "mount") == 0) {
+								list2.remove(3);
+							}
+							// 如果没有牌， 移除选项四
+							if (player.countCards("he") == 0) {
+								list2.remove(4);
+							}
+
+							var choices = list2.map(i => {
+								return "选项" + get.cnNumber(i, true);
+							});
+							var choiceList = ["令电棍回复一点体力，并获得房管牌", "对其使用一张牌，并弃置房管牌", "弃置一张坐骑牌", "交给其一张牌", "失去一点体力"].map((text, ind) => {
+								if (list2.includes(ind + 1)) {
+									return text;
+								}
+								return '<span style="opacity:0.5">' + text + "</span>";
+							});
+
+							const playerChoice = await player
+								.chooseControl(choices)
+								.set("choiceList", choiceList)
+								.set("prompt", get.prompt("chouxiang_fangguan_victim")).forResult();
+
+							console.log(`Player ${player.name} chose:`, playerChoice);
+							await player.popup(playerChoice.control); // 弹出选择结果
+							switch (playerChoice.control) {
+								case "选项一":
+									await ottoPlayer.recover(); // 令电棍回复体力
+									await player.gain(player.getExpansions("chouxiang_fangguan_victim"), "give", player, "bySelf"); // 获得房管牌
+									await player.removeSkill("chouxiang_fangguan_victim");
+									delete player.storage.chouxiang_fangguan_victim;
+									break;
+								case "选项二":
+									const card = await player.chooseToUse("请选择一张牌使用").forResultCard();
+									if (card) await player.useCard(card, ottoPlayer); // 对其使用牌
+									await player.discard(player.getExpansions("chouxiang_fangguan_victim")); // 弃置房管牌
+									await player.removeSkill("chouxiang_fangguan_victim");
+									delete player.storage.chouxiang_fangguan_victim;
+									break;
+								case "选项三":
+									const mounts = player.getCards("e", (card) => get.type(card) == "mount");
+									if (mounts.length > 0) {
+										const mountCard = await player.chooseToDiscard(mounts, true, `请选择一张坐骑牌弃置`).forResultCards();
+										if (mountCard.length > 0) {
+											await player.discard(mountCard[0]); // 弃置坐骑牌
+										}
+									}
+									break;
+								case "选项四":
+									const giveCard = await player.chooseCard("he", true, `请选择一张牌交给${ottoPlayer.name}`).forResultCards();
+									console.log(`Player ${player.name} chose to give a card to ${ottoPlayer.name}:`, giveCard);
+									if (giveCard.length > 0) {
+										await player.give(giveCard[0], ottoPlayer); // 交给其一张牌
+									}
+									break;
+								case "选项五":
+									await player.loseHp(1); // 失去一点体力
+									break;
+								default:
+									console.warn(`Unexpected choice: ${playerChoice.control}`); // 处理意外选择
+									break;
+							}
+						},
 					},
 				},
 				translate: {
@@ -194,9 +275,9 @@ export default function () {
 					chouxiang_shuncong: "顺从",
 					chouxiang_shuncong_info: "锁定技，体力小于等于1的角色对你使用牌时，你摸一张牌，但不能使用或打出手牌。",
 					chouxiang_fangguan: "房管",
-					chouxiang_fangguan_info: "其他角色使用牌指定你为目标后，若其没有“房管”，你可以摸两张牌，并将一张牌牌面向上至于其武将牌上，称为“房管”。有“房管”的角色对你使用牌无距离限制，你对有“房管”的角色使用牌无次数限制。一名角色的回合结束时，若其有“房管”，其选择一项：①令你回复一点体力，然后获得武将牌上的“房管”；②对你使用一张牌（需合法），然后获得武将牌上的“房管”；③弃置一张坐骑牌；④交给你一张牌；⑤失去一点体力。",
+					chouxiang_fangguan_info: "其他角色使用牌指定你为目标后，若其没有“房管”，你可以摸两张牌，并将一张牌牌面向上至于其武将牌上，称为“房管”。有“房管”的角色对你使用牌无距离限制，你对有“房管”的角色使用牌无次数限制。一名角色的回合结束时，若其有“房管”，其选择一项：①令你回复一点体力，然后获得武将牌上的“房管”；②对你使用一张牌（需合法），然后弃置武将牌上的“房管”；③弃置一张坐骑牌；④交给你一张牌；⑤失去一点体力。",
 					chouxiang_fangguan_victim: "房管",
-					chouxiang_fangguan_victim_info: "拥有“房管”的角色。",
+					chouxiang_fangguan_victim_info: "对电棍使用牌无距离限制，电棍对“房管”使用牌无次数限制。回合结束时，选择一项：①令你回复一点体力，然后获得武将牌上的“房管”；②对你使用一张牌（需合法），然后弃置武将牌上的“房管”；③弃置一张坐骑牌；④交给你一张牌；⑤失去一点体力。",
 				},
 			},
 			intro: "",
