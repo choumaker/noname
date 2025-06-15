@@ -232,10 +232,19 @@ export default function () {
 									await player.removeSkill("chouxiang_fangguan_victim");
 									break;
 								case "选项二":
-									const card = await player.chooseToUse("请选择一张牌使用").forResultCard();
-									if (card) await player.useCard(card, ottoPlayer); // 对其使用牌
-									await player.discard(player.getExpansions("chouxiang_fangguan_victim")); // 弃置房管牌
-									await player.removeSkill("chouxiang_fangguan_victim");
+									const cardUsed = await player.chooseToUse(function (card, player, event) {
+										return player.canUse(card, ottoPlayer, true, false);
+									}, "对电棍使用一张牌，否则失去一点体力").set("filterTarget", function (card, player, target) {
+										return target == ottoPlayer; // 只能对电棍使用牌
+									}).forResultBool();
+
+									if (cardUsed) {
+										await player.discard(player.getExpansions("chouxiang_fangguan_victim")); // 弃置房管牌
+										await player.removeSkill("chouxiang_fangguan_victim");
+									}
+									else {
+										await player.loseHp(1); // 失去一点体力
+									}
 									break;
 								case "选项三":
 									const mounts = player.getCards("e", (card) => get.type(card) == "mount");
