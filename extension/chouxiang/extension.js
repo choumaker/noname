@@ -125,7 +125,7 @@ export default function () {
 						popup: false,
 						mod: {
 							globalFrom(from, to, distance) {
-								return 1; // 设置距离为1
+								return -Infinity; // 设置距离为1
 							},
 						},
 					},
