@@ -236,13 +236,14 @@ export default function () {
 										return player.canUse(card, ottoPlayer, true, false);
 									}, "对电棍使用一张牌，否则失去一点体力").set("filterTarget", function (card, player, target) {
 										return target == ottoPlayer; // 只能对电棍使用牌
-									}).forResultBool();
+									}).set("forced", true).forResultBool();
 
 									if (cardUsed) {
 										await player.discard(player.getExpansions("chouxiang_fangguan_victim")); // 弃置房管牌
 										await player.removeSkill("chouxiang_fangguan_victim");
 									}
 									else {
+										// 这里应该永远不会执行，因为如果没有牌可用，选项二会被移除
 										await player.loseHp(1); // 失去一点体力
 									}
 									break;
