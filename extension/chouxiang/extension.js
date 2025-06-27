@@ -102,7 +102,7 @@ export default function () {
 						trigger: { player: "showCharacterAfter" },
 						forced: true,
 						hiddenSkill: true,
-						filterCard: (event, player) => player.hasCard(player.canRecast(card), "h"),
+						filterCard: (card, player) => player.hasCard(player.canRecast(card), "h"),
 						async content(event, trigger, player) {
 							const players = game.filterPlayer();
 							for (const p of players) {
