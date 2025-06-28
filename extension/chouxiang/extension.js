@@ -15,11 +15,13 @@ export default function () {
 				character: {
 					xiaochuan: { sex: "male", group: "qun", hp: 5, skills: ["chouxiang_zuikui", "chouxiang_dongying"], descriptions: ["zhu", "des:罪魁祸首", "ext:chouxiang/xiaochuan.jpg", "die:ext:chouxiang/audio/die/xiaochuan.mp3"] },
 					cx_otto: { sex: "male", group: "wei", hp: 3, skills: ["chouxiang_waao", "chouxiang_fangguan", "chouxiang_shuncong"], descriptions: ["des:教父"], hasHiddenSkill: true },
+					cx_re_xiaochuan: { sex: "male", group: "qun", hp: 5, skills: ["re_chouxiang_zuikui", "re_chouxiang_dongying"], descriptions: ["zhu", "des:东瀛天皇", "ext:chouxiang/cx_re_xiaochuan.jpg"] },
 				},
 				translate: {
 					xiaochuan: "笑川",
 					chouxiang: "抽象",
 					cx_otto: "电棍",
+					cx_re_xiaochuan: "界笑川",
 				},
 			},
 			card: {
@@ -271,6 +273,8 @@ export default function () {
 							}
 						},
 					},
+					re_chouxiang_zuikui: {
+					},
 				},
 				translate: {
 					chouxiang_zuikui: "罪魁",
@@ -286,6 +290,10 @@ export default function () {
 					chouxiang_fangguan: "房管",
 					chouxiang_fangguan_info: "其他角色使用牌指定你为目标后，若其没有“房管”，你可以摸两张牌，并将一张牌牌面向上至于其武将牌上，称为“房管”。有“房管”的角色对你使用牌无距离限制，你对有“房管”的角色使用牌无次数限制。一名角色的回合结束时，若其有“房管”，其选择一项：①令你回复一点体力，然后获得武将牌上的“房管”；②对你使用一张牌（需合法），然后弃置武将牌上的“房管”；③弃置一张坐骑牌；④交给你一张牌；⑤失去一点体力。",
 					chouxiang_fangguan_victim: "房管",
+					re_chouxiang_zuikui: "罪魁",
+					re_chouxiang_zuikui_info: "转换技： 阳：一名角色使用牌时，若你既不是此牌的使用者也不是目标，其可以获得你一张牌或摸一张牌，然后你成为此牌的使用者；阴：有角色受到伤害时，若伤害来源不是你，你可以获得伤害来源一张牌或摸等同于伤害数张牌，然后成为此伤害的来源。",
+					re_chouxiang_dongying: "东瀛",
+					re_chouxiang_dongying_info: "主公技，锁定技，（未完成）",
 				},
 			},
 			intro: "",
@@ -294,7 +302,7 @@ export default function () {
 			forumURL: "",
 			version: "1.0",
 		},
-		files: { character: ["xiaochuan.jpg", "cx_otto.jpg"], card: [], skill: [], audio: [] },
+		files: { character: ["xiaochuan.jpg", "cx_otto.jpg", "cx_re_xiaochuan.jpg"], card: [], skill: [], audio: [] },
 		connect: false,
 	};
 }
