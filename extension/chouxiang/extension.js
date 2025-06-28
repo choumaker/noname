@@ -13,11 +13,11 @@ export default function () {
 		package: {
 			character: {
 				character: {
-					erenxiaochuan: { sex: "male", group: "qun", hp: 5, skills: ["chouxiang_zuikui", "chouxiang_dongying"], descriptions: ["zhu", "des:罪魁祸首", "ext:chouxiang/erenxiaochuan.jpg", "die:ext:chouxiang/audio/die/erenxiaochuan.mp3"] },
+					xiaochuan: { sex: "male", group: "qun", hp: 5, skills: ["chouxiang_zuikui", "chouxiang_dongying"], descriptions: ["zhu", "des:罪魁祸首", "ext:chouxiang/xiaochuan.jpg", "die:ext:chouxiang/audio/die/xiaochuan.mp3"] },
 					cx_otto: { sex: "male", group: "wei", hp: 3, skills: ["chouxiang_waao", "chouxiang_fangguan", "chouxiang_shuncong"], descriptions: ["des:教父"], hasHiddenSkill: true },
 				},
 				translate: {
-					erenxiaochuan: "恶人笑川",
+					xiaochuan: "笑川",
 					chouxiang: "抽象",
 					cx_otto: "电棍",
 				},
@@ -294,7 +294,7 @@ export default function () {
 			forumURL: "",
 			version: "1.0",
 		},
-		files: { character: ["erenxiaochuan.jpg", "cx_otto.jpg"], card: [], skill: [], audio: [] },
+		files: { character: ["xiaochuan.jpg", "cx_otto.jpg"], card: [], skill: [], audio: [] },
 		connect: false,
 	};
 }
